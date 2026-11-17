@@ -107,3 +107,29 @@ test("brief import converts images but discards unsupported quotes", async () =>
   assert.equal(data.candidates[0].sourceKind, "image");
   assert.equal(data.candidates[0].status, "图片识别·待核对原图");
 });
+
+test("brief import accepts a 20 MB file and rejects a larger file", async () => {
+  const importEnv = { WORKBENCH_KEY: "test-password", AI: {
+    toMarkdown: async () => [{ format: "markdown", data: "包装标示：每瓶 60 粒。" }],
+    run: async () => ({ response: JSON.stringify({ candidates: [{ type: "fact", statement: "每瓶 60 粒", source_index: 0, quote: "每瓶 60 粒" }] }) })
+  } };
+  const makeRequest = size => {
+    const form = new FormData();
+    form.append("files", new File([new Uint8Array(size)], "product.pdf", { type: "application/pdf" }));
+    return new Request("https://example.pages.dev/api/brief-import", { method: "POST", headers: { "X-Workbench-Key": "test-password" }, body: form });
+  };
+  const limit = 20 * 1024 * 1024;
+  const accepted = await importBrief({ request: makeRequest(limit), env: importEnv });
+  assert.equal(accepted.status, 200);
+  assert.equal((await accepted.json()).candidates.length, 1);
+  const rejected = await importBrief({ request: makeRequest(limit + 1), env: importEnv });
+  assert.equal(rejected.status, 422);
+  assert.match((await rejected.json()).files[0].status, /20 MB/);
+});
+
+test("brief import rejects requests above the 50 MB total limit", async () => {
+  const request = new Request("https://example.pages.dev/api/brief-import", { method: "POST", headers: { "X-Workbench-Key": "test-password", "Content-Length": String(50 * 1024 * 1024 + 100001) } });
+  const response = await importBrief({ request, env: { ...env, AI: { toMarkdown: async () => {}, run: async () => {} } } });
+  assert.equal(response.status, 413);
+  assert.match((await response.json()).error, /50 MB/);
+});

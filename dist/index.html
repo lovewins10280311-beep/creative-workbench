@@ -46,7 +46,7 @@
               <label class="brief-drop" id="brief-drop">选择文件，或将文件拖到这里
                 <input id="brief-files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp" />
               </label>
-              <p class="settings-hint" id="brief-file-list">支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件、单个 8 MB。</p>
+              <p class="settings-hint" id="brief-file-list">支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件，单个不超过 20 MB、总量不超过 50 MB。</p>
               <button class="primary" id="brief-extract" type="button">提取候选事实与证据 <span>↗</span></button>
               <p id="brief-import-status" role="status" aria-live="polite">只处理你选中的文件。文件会临时发送至 Cloudflare AI 解析；本站代码不保存原文件，也不会提交到 GitHub。图片识别及 AI 分析可能产生用量费用。</p>
               <div id="brief-candidates" class="brief-candidates" hidden><div class="brief-candidates-head"><strong>待核对候选项</strong><span>默认不选中；请打开原件核对引文</span></div><div id="brief-candidate-list"></div><button class="primary" id="brief-apply" type="button">把选中项写入上方 Brief <span>↗</span></button></div>
@@ -171,6 +171,6 @@
       </section>
     </main>
     <template id="item-template"><article class="saved-item"><div class="item-meta"></div><h3></h3><p></p><div class="item-tags"></div><button class="copy-button">复制</button></article></template>
-    <script src="./app.js?v=6"></script>
+    <script src="./app.js?v=7"></script>
   </body>
 </html>

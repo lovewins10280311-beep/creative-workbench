@@ -105,7 +105,7 @@ $("#auto-form").onsubmit=async e=>{
 };
 let selectedBriefFiles=[], briefCandidates=[];
 function showBriefFiles(){
-  $("#brief-file-list").textContent=selectedBriefFiles.length ? selectedBriefFiles.map(f=>f.name+"（"+(f.size/1024/1024).toFixed(1)+" MB）").join("、") : "支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件、单个 8 MB。";
+  $("#brief-file-list").textContent=selectedBriefFiles.length ? selectedBriefFiles.map(f=>f.name+"（"+(f.size/1024/1024).toFixed(1)+" MB）").join("、") : "支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件，单个不超过 20 MB、总量不超过 50 MB。";
 }
 $("#brief-files").addEventListener("change",e=>{selectedBriefFiles=Array.from(e.target.files||[]);showBriefFiles()});
 const drop=$("#brief-drop");
@@ -130,7 +130,7 @@ $("#brief-extract").onclick=async()=>{
   const key=$("#auto-key").value, button=$("#brief-extract");
   if(!key){$("#product-settings").open=true;$("#brief-import-status").textContent="请先填写访问口令。";return}
   if(!selectedBriefFiles.length||selectedBriefFiles.length>5){$("#brief-import-status").textContent="请选择 1–5 个文件。";return}
-  if(selectedBriefFiles.some(f=>f.size>8*1024*1024)||selectedBriefFiles.reduce((n,f)=>n+f.size,0)>20*1024*1024){$("#brief-import-status").textContent="单文件不能超过 8 MB，总量不能超过 20 MB。";return}
+  if(selectedBriefFiles.some(f=>f.size>20*1024*1024)||selectedBriefFiles.reduce((n,f)=>n+f.size,0)>50*1024*1024){$("#brief-import-status").textContent="单文件不能超过 20 MB，总量不能超过 50 MB。";return}
   button.disabled=true;briefCandidates=[];renderBriefCandidates();rememberBrief();
   $("#brief-import-status").textContent="正在解析你选中的文件并提取候选项，请稍候…";
   try{

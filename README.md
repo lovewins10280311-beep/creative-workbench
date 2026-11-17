@@ -6,7 +6,7 @@
 
 在浏览器首次填写产品 Brief 和访问口令后，只提供一条 **你主动选择的 TikTok 公公开视频链接**，工作台自动发起提取、获取口播/字幕、做机制拆解，并生成目标产品的待验证短视频脚本。不会自动搜索对标或发布视频。提取不到口播时会报错，不把标题当逐字稿。
 
-产品 Brief 可通过 **选择文件或拖入文件** 辅助填写：支持 PDF、DOCX、XLSX/XLS、CSV、TXT/MD、PNG/JPEG/WebP。最多 5 个文件、单个 8 MB、合计 20 MB。工作台将文件临时发送到 Cloudflare Workers AI 做文本转换与候选提取；应用代码不保存原文件，不提交到 GitHub。候选项默认不选中，只有用户对照原件勾选后才写入当前浏览器的 Brief。图片的“引文”来自 AI 图像识别文本，不等于原图逐字文字；须核对原图。扫描版 PDF 和图片小字可能识别失败。
+产品 Brief 可通过 **选择文件或拖入文件** 辅助填写：支持 PDF、DOCX、XLSX/XLS、CSV、TXT/MD、PNG/JPEG/WebP。最多 5 个文件、单个不超过 20 MB、合计不超过 50 MB。工作台将文件临时发送到 Cloudflare Workers AI 做文本转换与候选提取；应用代码不保存原文件，不提交到 GitHub。候选项默认不选中，只有用户对照原件勾选后才写入当前浏览器的 Brief。图片的“引文”来自 AI 图像识别文本，不等于原图逐字文字；须核对原图。扫描版 PDF 和图片小字可能识别失败。
 
 自动提取由 Apify 的 `clockworks/tiktok-video-scraper` Actor 完成，内容拆解由 Cloudflare Workers AI 完成；两项服务均可能产生用量费用。公开仓库与网页不包含任何令牌。
 文件转换大多数格式免费，但图片处理及后续候选提取模型可能产生 Workers AI 用量费用；请查看 [Cloudflare Markdown Conversion](https://developers.cloudflare.com/workers-ai/features/markdown-conversion/)。

@@ -1,8 +1,8 @@
 import { authorized, json } from "../../lib/common.js";
 
 const MAX_FILES = 5;
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 50 * 1024 * 1024;
 const MIME_BY_EXT = {
   pdf: "application/pdf",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -39,7 +39,7 @@ function comparable(value) {
 
 async function extractFile(env, file, name, type) {
   if (["text/plain", "text/markdown", "text/csv"].includes(type)) return { text: await file.text(), format: "text" };
-  const conversion = await env.AI.toMarkdown([{ name, blob: new Blob([await file.arrayBuffer()], { type }) }]);
+  const conversion = await env.AI.toMarkdown([{ name, blob: file }]);
   const result = Array.isArray(conversion) ? conversion[0] : Array.isArray(conversion?.result) ? conversion.result[0] : null;
   if (!result || result.format === "error" || typeof result.data !== "string") throw new Error(result?.error || "文件格式解析失败");
   return { text: result.data, format: result.format || "markdown" };
@@ -50,13 +50,13 @@ export async function onRequestPost({ request, env }) {
   if (auth) return json({ error: auth.error }, auth.status);
   if (!env.AI?.toMarkdown || !env.AI?.run) return json({ error: "尚未配置 Workers AI 绑定 AI。" }, 503);
   const size = Number(request.headers.get("content-length") || 0);
-  if (size > MAX_TOTAL_BYTES + 100000) return json({ error: "文件总量超过 20 MB。" }, 413);
+  if (size > MAX_TOTAL_BYTES + 100000) return json({ error: "文件总量超过 50 MB。" }, 413);
   let form;
   try { form = await request.formData(); }
   catch { return json({ error: "无法读取上传文件，请重新选择。" }, 400); }
   const files = form.getAll("files").filter(value => value instanceof File);
   if (!files.length || files.length > MAX_FILES) return json({ error: "请选择 1–5 个文件。" }, 400);
-  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_BYTES) return json({ error: "文件总量超过 20 MB。" }, 413);
+  if (files.reduce((sum, file) => sum + file.size, 0) > MAX_TOTAL_BYTES) return json({ error: "文件总量超过 50 MB。" }, 413);
 
   const extracted = [], notices = [];
   for (const file of files) {
@@ -64,7 +64,7 @@ export async function onRequestPost({ request, env }) {
     const extension = name.split(".").pop()?.toLowerCase();
     const type = MIME_BY_EXT[extension];
     if (!type) { notices.push({ name, status: "不支持的格式" }); continue; }
-    if (file.size > MAX_FILE_BYTES) { notices.push({ name, status: "超过单文件 8 MB 限制" }); continue; }
+    if (file.size > MAX_FILE_BYTES) { notices.push({ name, status: "超过单文件 20 MB 限制" }); continue; }
     try {
       const converted = await extractFile(env, file, name, type);
       const text = String(converted.text || "").trim();
