@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CREATIVE LOOP · 创意工作台</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="grain"></div>
+    <main class="shell">
+      <header class="topbar">
+        <button class="brand" data-view="home" aria-label="返回首页"><span class="brand-mark">C</span><span>CREATIVE LOOP</span></button>
+        <div class="topbar-right"><span class="live-dot"></span><span>出海创意工作台</span><span class="divider"></span><span id="saved-state">正在连接</span></div>
+      </header>
+
+      <section id="home-view" class="view active">
+        <div class="hero">
+          <div>
+            <p class="eyebrow">SHORT VIDEO / MATERIAL INTELLIGENCE</p>
+            <h1>把看到的灵感，<br /><em>变成下一轮测试。</em></h1>
+          </div>
+          <p class="hero-copy">为 TikTok Shop 设计：从用户提供的素材中拆机制，再生成可拍、可审、可测试的脚本。不会自动找对标或发布。</p>
+        </div>
+
+        <section class="auto-workbench" aria-labelledby="auto-title">
+          <div class="auto-intro"><p class="eyebrow">ONE LINK / FULL LOOP</p><h2 id="auto-title">贴一条视频，<em>自动生成拆解与脚本。</em></h2><p>首次设置产品事实后，日常只需输入你主动提供的 TikTok 链接。提取不到原始口播时会明确报错，不会把视频标题冒充逐字稿。</p></div>
+          <form id="auto-form" class="auto-form">
+            <label>视频链接<input name="url" type="url" required placeholder="https://www.tiktok.com/@.../video/... 或 vt.tiktok.com 短链" /></label>
+            <button class="primary" type="submit" id="auto-run">自动收集 → 拆解 → 生成 <span>↗</span></button>
+          </form>
+          <details class="auto-settings" id="product-settings"><summary>首次设置：产品 Brief 与访问口令</summary>
+            <div class="auto-settings-grid">
+              <label>产品名称<input id="auto-product" placeholder="例如：优思益蓝莓护眼丸（具体 SKU）" /></label>
+              <label>目标市场<input id="auto-market" placeholder="例如：马来西亚 TikTok Shop" /></label>
+              <label>脚本语言<select id="auto-language"><option value="EN">English</option><option value="MS">Bahasa Melayu</option><option value="ZH">中文工作稿</option></select></label>
+              <label>可公开核对的产品事实<textarea id="auto-facts" placeholder="只填包装或已批准资料中的事实；不填未经证实的功效"></textarea></label>
+              <label>可拍证据与限制<textarea id="auto-evidence" placeholder="包装、使用场景、合规限制、不能说的词"></textarea></label>
+              <label>访问口令<input id="auto-key" type="password" autocomplete="off" placeholder="与 Cloudflare WORKBENCH_KEY Secret 一致，不会写入仓库" /></label>
+            </div>
+            <p class="settings-hint">产品 Brief 仅保存在此浏览器；口令仅保存在当前浏览器会话。服务端需要配置 APIFY_TOKEN、WORKBENCH_KEY 和 AI 绑定后才能处理链接。</p>
+          </details>
+          <p id="auto-status" role="status" aria-live="polite">等待输入链接。不会自动搜索对标，也不会发布内容。</p>
+          <div id="auto-output" class="auto-output" hidden>
+            <div><h3>原始口播</h3><pre id="auto-transcript"></pre></div>
+            <div><h3>机制拆解</h3><pre id="auto-breakdown"></pre></div>
+            <div><h3>产品脚本 · 待验证</h3><pre id="auto-script"></pre></div>
+          </div>
+        </section>
+        <div class="flow-line"><span>输入</span><i></i><span>观察</span><i></i><span>假设</span><i></i><span>测试</span></div>
+        <div class="trend-strip" aria-label="TikTok 2026 内容方向">
+          <div><strong>真实日常</strong><span>真人、真实过程，而非伪造使用效果</span></div>
+          <div><strong>具体问题</strong><span>从你提供的评论与素材里找切口</span></div>
+          <div><strong>为何值得买</strong><span>用可核事实解释购买理由</span></div>
+        </div>
+        <div class="tool-grid">
+          <button class="tool-card coral" data-view="collect">
+            <span class="tool-no">01</span><span class="arrow">↗</span><h2>收集素材</h2><p>记录链接、亮点和你想借鉴的方向。</p><div class="card-footer"><span><b id="collect-count">0</b> 条已入库</span><span class="status-dot"></span></div>
+          </button>
+          <button class="tool-card blue" data-view="transcript">
+            <span class="tool-no">02</span><span class="arrow">↗</span><h2>逐字稿库</h2><p>保存原始口播，为后续判断留住证据。</p><div class="card-footer"><span><b id="transcript-count">0</b> 条待拆</span><span class="status-dot"></span></div>
+          </button>
+          <button class="tool-card lime" data-view="breakdown">
+            <span class="tool-no">03</span><span class="arrow">↗</span><h2>机制拆解</h2><p>拆出钩子、问题、证据、行动与不可迁移项。</p><div class="card-footer"><span><b id="breakdown-count">0</b> 张拆解卡</span><span class="status-dot"></span></div>
+          </button>
+          <button class="tool-card ink" data-view="generate">
+            <span class="tool-no">04</span><span class="arrow">↗</span><h2>脚本实验室</h2><p>将已拆机制变成带镜头、口播、证据关口的测试脚本。</p><div class="card-footer"><span><b id="idea-count">0</b> 个待测脚本</span><span class="status-dot"></span></div>
+          </button>
+        </div>
+        <footer class="home-note">先收集，再判断；先验证，再裂变。</footer>
+      </section>
+
+      <section id="workspace-view" class="view workspace">
+        <aside class="sidebar">
+          <button class="back" data-view="home">← 返回工作台</button>
+          <p class="eyebrow">WORKSPACE</p>
+          <nav>
+            <button data-view="collect"><span>01</span> 收集素材</button>
+            <button data-view="transcript"><span>02</span> 逐字稿库</button>
+            <button data-view="breakdown"><span>03</span> 机制拆解</button>
+            <button data-view="generate"><span>04</span> 脚本实验室</button>
+          </nav>
+          <div class="sidebar-foot"><span class="live-dot"></span> 浏览器本地保存 · 不自动发布</div>
+        </aside>
+
+        <div class="work-panel">
+          <section class="tool-page" id="collect-page">
+            <div class="page-heading"><p class="eyebrow">01 / COLLECT</p><h2>先记录，<em>别急着模仿。</em></h2><p>只入库与目标人群、购买任务或表达机制有关的素材。</p></div>
+            <div class="two-col">
+              <form class="form-card" id="collect-form">
+                <label>素材链接或来源<input name="source" required placeholder="TikTok 链接、截图来源或本地素材文件名" /></label>
+                <label>市场与语言<input name="locale" placeholder="例如：马来西亚 / 英语、马来语" /></label>
+                <label>素材类型<select name="format"><option>达人/KOC 真实体验</option><option>品牌自制演示</option><option>评论回复</option><option>问题解答/搜索意图</option><option>其他</option></select></label>
+                <label>你看到的亮点<textarea name="highlight" required placeholder="例如：开头用一个反常识动作，马上展示结果"></textarea></label>
+                <label>想验证的方向<input name="angle" placeholder="例如：场景钩子 / 证据画面 / 人设" /></label>
+                <label>标签<input name="tags" placeholder="通勤、开头、口播，用逗号分隔" /></label>
+                <button class="primary" type="submit">入库素材 <span>↗</span></button>
+              </form>
+              <div class="list-card"><div class="list-title"><span>素材库</span><button class="text-button" data-clear="materials">清空</button></div><div id="material-list" class="item-list empty">还没有素材。先把值得研究的内容放进来。</div></div>
+            </div>
+          </section>
+
+          <section class="tool-page" id="transcript-page">
+            <div class="page-heading"><p class="eyebrow">02 / TRANSCRIPT</p><h2>保留原始表达，<em>再提炼观点。</em></h2><p>选中你提供的 TikTok 视频，优先识别原语种口播；无法识别时才使用平台字幕兜底。结果请核对后保存。</p></div>
+            <div class="two-col">
+              <form class="form-card" id="transcript-form">
+                <label>关联素材<select id="transcript-material"></select></label>
+                <button id="auto-transcribe" type="button">自动提取原始口播</button>
+                <p id="transcribe-status" role="status" aria-live="polite">仅处理你主动提供的 TikTok 链接；不自动保存或发布。</p>
+                <label>逐字稿<textarea name="transcript" required placeholder="粘贴视频中的原始口播内容，不要先改写。"></textarea></label>
+                <label>备注<input name="note" placeholder="人物、时长、镜头或你的观察" /></label>
+                <button class="primary" type="submit">保存逐字稿 <span>↗</span></button>
+              </form>
+              <div class="list-card"><div class="list-title"><span>原始口播</span><button class="text-button" data-clear="transcripts">清空</button></div><div id="transcript-list" class="item-list empty">逐字稿会在这里保留，供拆解时引用。</div></div>
+            </div>
+          </section>
+
+          <section class="tool-page" id="breakdown-page">
+            <div class="page-heading"><p class="eyebrow">03 / BREAKDOWN</p><h2>拆的是机制，<em>不是句子。</em></h2><p>用“钩子—问题—机制—证据—行动”判断什么值得测试，什么不能照搬。</p></div>
+            <div class="two-col breakdown-layout">
+              <form class="form-card" id="breakdown-form">
+                <label>选择逐字稿<select id="breakdown-transcript"></select></label>
+                <label>开头钩子（画面 + 第一句话）<textarea name="hook" required placeholder="发生了什么？用什么具体情境让人停留？"></textarea></label>
+                <label>内容解决的问题<input name="problem" required placeholder="目标用户在什么场景下有什么具体问题？" /></label>
+                <label>中段机制<textarea name="mechanism" required placeholder="如何从问题过渡到产品？卖点、异议、节奏是什么？"></textarea></label>
+                <label>证据画面<textarea name="proof" required placeholder="包装、真实使用、可核实文件，还是未提供？"></textarea></label>
+                <label>行动指令<input name="cta" placeholder="例如：到商品卡核对规格；优惠须实时核实" /></label>
+                <label>不可迁移项<input name="nontransfer" placeholder="品牌资产、未证实功效、名人、价格等" /></label>
+                <button class="primary" type="submit">生成拆解卡 <span>↗</span></button>
+              </form>
+              <div class="list-card"><div class="list-title"><span>拆解卡</span><button class="text-button" data-clear="breakdowns">清空</button></div><div id="breakdown-list" class="item-list empty">完成一次拆解后，会在这里形成可复用机制。</div></div>
+            </div>
+          </section>
+
+          <section class="tool-page" id="generate-page">
+            <div class="page-heading"><p class="eyebrow">04 / SCRIPT LAB</p><h2>先写可拍脚本，<em>再跑单变量测试。</em></h2><p>默认 TikTok Shop 马来西亚。生成的是待验证脚本草案；补充剂功效与投放许可必须另审。依据：<a href="https://ads.tiktok.com/business/en-US/next" target="_blank" rel="noopener noreferrer">TikTok 2026 趋势</a>、<a href="https://seller-my.tiktok.com/university/essay?knowledge_id=4840169791538945&amp;lang=en" target="_blank" rel="noopener noreferrer">马来西亚补充剂广告提示</a>。</p></div>
+            <div class="two-col">
+              <form class="form-card" id="idea-form">
+                <label>产品 / SKU<input name="product" required placeholder="例如：Youthit 蓝莓护眼丸（写清具体版本）" /></label>
+                <label>市场<select name="market"><option value="MY">马来西亚 TikTok Shop</option><option value="OTHER">其他 TikTok 市场（需另审当地规则）</option></select></label>
+                <label>脚本语言<select name="language"><option value="EN">English</option><option value="MS">Bahasa Melayu</option><option value="ZH">中文工作稿</option></select></label>
+                <label>阶段<select name="stage"><option value="cold">冷启动 · 看内容信号</option><option value="convert">转化验证 · 看购买行为</option><option value="scale">放量 · 看成交效率</option></select></label>
+                <label>供给方式<select name="supply"><option value="KOC">KOC / 达人真实体验</option><option value="BRAND">品牌自制</option></select></label>
+                <label>选择可迁移机制<select id="idea-breakdown"></select></label>
+                <label>目标人群与具体场景<input name="scene" required placeholder="例如：长时间看屏幕的上班族，在工位收拾背包" /></label>
+                <label>允许使用的产品事实<input name="fact" required placeholder="仅填写包装或已获批准资料中可公开核对的事实" /></label>
+                <label>证据来源 / 审核状态<input name="evidence" placeholder="文件名、包装位置、MAB 批准状态；未知则写待审核" /></label>
+                <label>可拍证据镜头<input name="visual" required placeholder="例如：实拍包装标签与日常收纳，不演示疗效" /></label>
+                <label>真实的购买理由<input name="whybuy" required placeholder="例如：明确规格、使用方式、适用人群；不要编造优惠" /></label>
+                <label>本轮唯一主变量<select name="variable"><option>开头场景</option><option>人物人设</option><option>证据画面</option><option>中段卖点顺序</option><option>行动指令</option></select></label>
+                <label>不变量<textarea name="constants" required placeholder="例如：产品、时长、核心事实、结尾行动指令保持一致"></textarea></label>
+                <button class="primary" type="submit">生成分镜脚本 <span>↗</span></button>
+              </form>
+              <div class="list-card"><div class="list-title"><span>脚本草案 · 待验证</span><button class="text-button" id="export-all" type="button">导出备份</button></div><div id="idea-list" class="item-list empty">脚本仅保存在当前浏览器；请定期导出备份。</div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <template id="item-template"><article class="saved-item"><div class="item-meta"></div><h3></h3><p></p><div class="item-tags"></div><button class="copy-button">复制</button></article></template>
+    <script src="./app.js?v=5"></script>
+  </body>
+</html>

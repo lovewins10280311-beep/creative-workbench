@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.env
+.dev.vars
+node_modules/
+*.xlsx
+*.xls
+*.csv
+*.mp4
+*.mov
+*.zip
+creative-loop-backup-*.json
