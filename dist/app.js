@@ -103,4 +103,58 @@ $("#auto-form").onsubmit=async e=>{
   }catch(err){$("#auto-status").textContent=err.message||"自动处理失败，请核对链接或服务配置。"}
   finally{button.disabled=false}
 };
+let selectedBriefFiles=[], briefCandidates=[];
+function showBriefFiles(){
+  $("#brief-file-list").textContent=selectedBriefFiles.length ? selectedBriefFiles.map(f=>f.name+"（"+(f.size/1024/1024).toFixed(1)+" MB）").join("、") : "支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件、单个 8 MB。";
+}
+$("#brief-files").addEventListener("change",e=>{selectedBriefFiles=Array.from(e.target.files||[]);showBriefFiles()});
+const drop=$("#brief-drop");
+for(const eventName of ["dragenter","dragover"])drop.addEventListener(eventName,e=>{e.preventDefault();drop.classList.add("drag-over")});
+for(const eventName of ["dragleave","drop"])drop.addEventListener(eventName,e=>{e.preventDefault();drop.classList.remove("drag-over")});
+drop.addEventListener("drop",e=>{selectedBriefFiles=Array.from(e.dataTransfer?.files||[]);showBriefFiles()});
+function renderBriefCandidates(){
+  const list=$("#brief-candidate-list");list.replaceChildren();
+  for(const [index,item] of briefCandidates.entries()){
+    const label=document.createElement("label");label.className="brief-candidate";
+    const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=String(index);
+    const body=document.createElement("span");body.className="brief-candidate-body";
+    const type=document.createElement("span");type.className="brief-candidate-type";type.textContent={fact:"候选事实",evidence:"可拍证据",restriction:"限制/风险"}[item.type]||"待核对";
+    const statement=document.createElement("span");statement.className="brief-candidate-statement";statement.textContent=item.statement;
+    const source=document.createElement("span");source.className="brief-candidate-source";source.textContent="来源："+item.source+" · "+item.status;
+    const quote=document.createElement("span");quote.className="brief-candidate-quote";quote.textContent=(item.sourceKind==="image"?"图像识别文本：“":"提取原文：“")+item.quote+"”";
+    body.append(type,statement,source,quote);label.append(checkbox,body);list.append(label);
+  }
+  $("#brief-candidates").hidden=!briefCandidates.length;
+}
+$("#brief-extract").onclick=async()=>{
+  const key=$("#auto-key").value, button=$("#brief-extract");
+  if(!key){$("#product-settings").open=true;$("#brief-import-status").textContent="请先填写访问口令。";return}
+  if(!selectedBriefFiles.length||selectedBriefFiles.length>5){$("#brief-import-status").textContent="请选择 1–5 个文件。";return}
+  if(selectedBriefFiles.some(f=>f.size>8*1024*1024)||selectedBriefFiles.reduce((n,f)=>n+f.size,0)>20*1024*1024){$("#brief-import-status").textContent="单文件不能超过 8 MB，总量不能超过 20 MB。";return}
+  button.disabled=true;briefCandidates=[];renderBriefCandidates();rememberBrief();
+  $("#brief-import-status").textContent="正在解析你选中的文件并提取候选项，请稍候…";
+  try{
+    const form=new FormData();selectedBriefFiles.forEach(file=>form.append("files",file,file.name));
+    const response=await fetch("/api/brief-import",{method:"POST",headers:{"X-Workbench-Key":key},body:form});
+    const data=await response.json().catch(()=>({}));
+    const fileSummary=Array.isArray(data.files)?data.files.map(x=>x.name+"："+x.status).join("；"):"";
+    if(!response.ok)throw Error((data.error||"文件解析失败")+" "+fileSummary);
+    briefCandidates=Array.isArray(data.candidates)?data.candidates:[];
+    renderBriefCandidates();
+    $("#brief-import-status").textContent=briefCandidates.length ? "提取到 "+briefCandidates.length+" 条待核对候选项。请对照原件，尤其是图片上的小字，勾选确认后写入 Brief。"+(fileSummary?" 文件状态："+fileSummary:"") : "文件已解析，但没有找到带可追溯依据的候选项。请检查原件或手动填写。"+(fileSummary?" 文件状态："+fileSummary:"");
+  }catch(error){$("#brief-import-status").textContent=error.message||"导入失败，请检查文件和服务配置。"}
+  finally{button.disabled=false}
+};
+$("#brief-apply").onclick=()=>{
+  const selected=Array.from($("#brief-candidate-list").querySelectorAll("input:checked")).map(input=>briefCandidates[Number(input.value)]).filter(Boolean);
+  if(!selected.length){$("#brief-import-status").textContent="请先对照原件核对，再勾选要写入的候选项。";return}
+  const facts=$("#auto-facts"),evidence=$("#auto-evidence");
+  for(const item of selected){
+    const entry="• "+item.statement+"（来源："+item.source+"；"+(item.sourceKind==="image"?"图像识别文本":"提取原文")+"："+item.quote+"）";
+    const target=item.type==="fact"?facts:evidence;
+    if(!target.value.includes(entry))target.value=(target.value.trim()?target.value.trim()+"\n":"")+entry;
+  }
+  rememberBrief();
+  $("#brief-import-status").textContent="已写入 "+selected.length+" 条候选内容。请继续核对能否公开使用、功效措辞和目标市场合规要求；这一步不代表已验证。";
+};
 boot();

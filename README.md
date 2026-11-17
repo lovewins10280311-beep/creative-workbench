@@ -6,7 +6,10 @@
 
 在浏览器首次填写产品 Brief 和访问口令后，只提供一条 **你主动选择的 TikTok 公公开视频链接**，工作台自动发起提取、获取口播/字幕、做机制拆解，并生成目标产品的待验证短视频脚本。不会自动搜索对标或发布视频。提取不到口播时会报错，不把标题当逐字稿。
 
+产品 Brief 可通过 **选择文件或拖入文件** 辅助填写：支持 PDF、DOCX、XLSX/XLS、CSV、TXT/MD、PNG/JPEG/WebP。最多 5 个文件、单个 8 MB、合计 20 MB。工作台将文件临时发送到 Cloudflare Workers AI 做文本转换与候选提取；应用代码不保存原文件，不提交到 GitHub。候选项默认不选中，只有用户对照原件勾选后才写入当前浏览器的 Brief。图片的“引文”来自 AI 图像识别文本，不等于原图逐字文字；须核对原图。扫描版 PDF 和图片小字可能识别失败。
+
 自动提取由 Apify 的 `clockworks/tiktok-video-scraper` Actor 完成，内容拆解由 Cloudflare Workers AI 完成；两项服务均可能产生用量费用。公开仓库与网页不包含任何令牌。
+文件转换大多数格式免费，但图片处理及后续候选提取模型可能产生 Workers AI 用量费用；请查看 [Cloudflare Markdown Conversion](https://developers.cloudflare.com/workers-ai/features/markdown-conversion/)。
 
 ## Pages 部署
 
@@ -32,5 +35,6 @@
 - 当前自动拆解依据元数据与口播文本，不包含逐帧视觉识别；镜头证据若未在口播中明确出现，会标为待核对。不能把它当作已验证的拍摄事实。
 - 生成脚本是待验证草案，不会替代产品事实、健康宣称、达人真实性和目标市场广告合规审核。
 - 一个浏览器中的资料不会自动同步到另一个浏览器或电脑。
+- 本地文件仅在用户主动选择并点击“提取”后发送至 Cloudflare AI 处理。页面不会凭电脑路径自行读取文件或文件夹。
 
 参考：[Cloudflare Pages Functions](https://developers.cloudflare.com/pages/functions/get-started/) · [Pages Bindings 与 Secrets](https://developers.cloudflare.com/pages/functions/bindings/) · [Apify Actor 文档](https://apify.com/clockworks/tiktok-video-scraper)

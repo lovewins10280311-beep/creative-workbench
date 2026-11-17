@@ -22,8 +22,8 @@ function briefFrom(body) {
     product: String(source.product || "").slice(0, 160).trim(),
     market: String(source.market || "TikTok Shop").slice(0, 120).trim(),
     language: ["EN", "MS", "ZH"].includes(source.language) ? source.language : "EN",
-    facts: String(source.facts || "").slice(0, 3000).trim(),
-    evidence: String(source.evidence || "").slice(0, 2000).trim()
+    facts: String(source.facts || "").slice(0, 8000).trim(),
+    evidence: String(source.evidence || "").slice(0, 6000).trim()
   };
 }
 

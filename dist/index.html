@@ -41,6 +41,16 @@
               <label>可拍证据与限制<textarea id="auto-evidence" placeholder="包装、使用场景、合规限制、不能说的词"></textarea></label>
               <label>访问口令<input id="auto-key" type="password" autocomplete="off" placeholder="与 Cloudflare WORKBENCH_KEY Secret 一致，不会写入仓库" /></label>
             </div>
+            <section class="brief-import" aria-labelledby="brief-import-title">
+              <div class="brief-import-heading"><div><h3 id="brief-import-title">从本地文件提取候选 Brief</h3><p>选择产品资料、表格或包装图片。先自动提取，再由你逐条核对并勾选；不会直接当作“已验证”。</p></div><span>LOCAL FILES → REVIEW</span></div>
+              <label class="brief-drop" id="brief-drop">选择文件，或将文件拖到这里
+                <input id="brief-files" type="file" multiple accept=".pdf,.docx,.xlsx,.xls,.csv,.txt,.md,.png,.jpg,.jpeg,.webp" />
+              </label>
+              <p class="settings-hint" id="brief-file-list">支持 PDF、Word、Excel、CSV、文本和图片；最多 5 个文件、单个 8 MB。</p>
+              <button class="primary" id="brief-extract" type="button">提取候选事实与证据 <span>↗</span></button>
+              <p id="brief-import-status" role="status" aria-live="polite">只处理你选中的文件。文件会临时发送至 Cloudflare AI 解析；本站代码不保存原文件，也不会提交到 GitHub。图片识别及 AI 分析可能产生用量费用。</p>
+              <div id="brief-candidates" class="brief-candidates" hidden><div class="brief-candidates-head"><strong>待核对候选项</strong><span>默认不选中；请打开原件核对引文</span></div><div id="brief-candidate-list"></div><button class="primary" id="brief-apply" type="button">把选中项写入上方 Brief <span>↗</span></button></div>
+            </section>
             <p class="settings-hint">产品 Brief 仅保存在此浏览器；口令仅保存在当前浏览器会话。服务端需要配置 APIFY_TOKEN、WORKBENCH_KEY 和 AI 绑定后才能处理链接。</p>
           </details>
           <p id="auto-status" role="status" aria-live="polite">等待输入链接。不会自动搜索对标，也不会发布内容。</p>
@@ -161,6 +171,6 @@
       </section>
     </main>
     <template id="item-template"><article class="saved-item"><div class="item-meta"></div><h3></h3><p></p><div class="item-tags"></div><button class="copy-button">复制</button></article></template>
-    <script src="./app.js?v=5"></script>
+    <script src="./app.js?v=6"></script>
   </body>
 </html>
