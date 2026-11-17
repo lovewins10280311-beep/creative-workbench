@@ -18,6 +18,8 @@
 4. Pages 项目 → Settings → Bindings → Add → Workers AI，Variable name 填 **`AI`**。
 5. 上述配置后重新部署一次，使 Secrets 和 Binding 生效。打开 Pages URL，在“首次设置”填写产品 Brief 和口令，再贴你自己提供的 TikTok 链接测试。
 
+本仓库连接 Cloudflare Pages 的 `main` 分支；配置 Secret 和 AI 绑定后，推送本 README 的文档更新即可触发一次新的生产部署，不需在网页中输入密钥。
+
 注意：仓库 Public 不等于 API 无保护。未设置 WORKBENCH_KEY、APIFY_TOKEN 与 AI 绑定时，自动处理接口会拒绝运行。请勿把未公开产品经营资料填进公开仓库；网页填写的 Brief 与结果仅存当前浏览器 localStorage，需自己定期“导出备份”。视频数据会在你的 Apify 账号中产生任务与结果；需要遵守目标平台和适用地区的规则。
 
 ## 本地检查
