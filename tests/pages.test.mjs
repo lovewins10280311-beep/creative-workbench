@@ -70,6 +70,25 @@ test("no transcript fails clearly instead of fabricating", async () => {
   } finally { globalThis.fetch = original; }
 });
 
+test("malformed AI JSON is retried before returning a script", async () => {
+  const original = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async url => {
+    if (String(url).includes("/actor-runs/")) return Response.json({ data: { status: "SUCCEEDED", defaultDatasetId: "dataset123456" } });
+    if (String(url).includes("/datasets/")) return Response.json([{ transcriptText: "Original spoken line" }]);
+    throw Error("Unexpected fetch");
+  };
+  try {
+    const retryEnv = { ...env, AI: { run: async () => ++calls === 1
+      ? { response: '{"breakdown":{"hook":"开头" "problem":"问题"},"script":"草案"}' }
+      : { response: JSON.stringify({ breakdown: { hook: "开头" }, script: "待验证脚本" }) } } };
+    const response = await result({ request: req("/api/result", { runId: "run12345678", brief: { product: "Test product", facts: "Public label fact" } }), env: retryEnv });
+    assert.equal(response.status, 200);
+    assert.equal(calls, 2);
+    assert.equal((await response.json()).script, "待验证脚本");
+  } finally { globalThis.fetch = original; }
+});
+
 test("brief import extracts quoted candidates from a selected local text file", async () => {
   const form = new FormData();
   form.append("files", new File(["包装标示：每瓶 60 粒。"], "product.txt", { type: "text/plain" }));

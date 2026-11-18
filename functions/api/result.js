@@ -36,7 +36,8 @@ function parseGenerated(response) {
   catch {
     const start = raw.indexOf("{"), end = raw.lastIndexOf("}");
     if (start < 0 || end <= start) throw new Error("AI 返回格式异常，请重试。");
-    parsed = JSON.parse(raw.slice(start, end + 1));
+    try { parsed = JSON.parse(raw.slice(start, end + 1)); }
+    catch { throw new Error("AI 返回的拆解格式不完整"); }
   }
   if (!parsed || typeof parsed !== "object" || !parsed.breakdown || !parsed.script) throw new Error("AI 未返回完整拆解与脚本，请重试。");
   const b = parsed.breakdown;
@@ -89,7 +90,22 @@ export async function onRequestPost({ request, env }) {
       max_completion_tokens: 2200, reasoning_effort: "low", temperature: 0.3,
       response_format: { type: "json_object" }
     });
-    const generated = parseGenerated(ai);
+    let generated;
+    try { generated = parseGenerated(ai); }
+    catch (error) {
+      if (!/AI 返回/.test(error.message)) throw error;
+      const raw = String(ai?.response || ai?.choices?.[0]?.message?.content || "").slice(0, 12000);
+      const repaired = await env.AI.run("@cf/qwen/qwen3.8-27b", {
+        messages: [
+          { role: "system", content: "修复输入中的 JSON 语法并补齐缺失字段，只输出合法 JSON 对象。字段必须是 breakdown（hook、problem、mechanism、proof、cta、nontransfer，均为字符串）和 script（字符串）。不要新增产品事实、功效或未提供的证据；缺失信息写待核对。" },
+          { role: "user", content: JSON.stringify({ brokenOutput: raw, transcript: transcript.slice(0, 4000), brief }) }
+        ],
+        max_completion_tokens: 3200, reasoning_effort: "low", temperature: 0,
+        response_format: { type: "json_object" }
+      });
+      try { generated = parseGenerated(repaired); }
+      catch { throw new Error("视频口播已提取，但 AI 两次返回的脚本格式均不完整；请稍后重试。不会保存不完整结果。"); }
+    }
     return json({ status: "done", material, transcript, ...generated });
   } catch (error) {
     return json({ error: error.message || "自动处理失败。" }, 502);
